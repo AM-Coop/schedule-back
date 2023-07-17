@@ -1,10 +1,11 @@
-ru:
-  am:
-    google-tabs:
-      auth-file-path:
-        unix: '/etc/am/credentials.json'
-        win: 'TODO'
-
 spring:
   application:
     name: am-schedule
+  data:
+    mongodb:
+      authentication-database: admin
+      password: pass123
+      username: mongofiboadmin
+      host: localhost
+      port: 27017
+      database: schedule

@@ -9,3 +9,6 @@ spring:
       host: localhost
       port: 27017
       database: schedule
+
+server:
+  port: 8081

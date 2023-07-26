@@ -24,7 +24,7 @@ public class EventDocumentV2 {
     private LocalTime endTime;
     private ZoneId timeZone;
     private String description;
-    private EventManager eventManager;
+    private Manager manager;
     private boolean paid;
     private BigDecimal paymentAmount;
     private boolean boldAm;
@@ -32,7 +32,4 @@ public class EventDocumentV2 {
     private boolean suitableUm;
     private boolean publish;
     private Week week;
-
-
-
 }

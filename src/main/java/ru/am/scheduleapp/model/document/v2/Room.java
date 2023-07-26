@@ -6,11 +6,9 @@ import org.springframework.data.annotation.Id;
 
 @Data
 @AllArgsConstructor
-public class EventManager {
+public class Room {
     @Id
     private String id;
-    private String managerName;
-    private String image;
-    private String managerDescription;
-    private String managerContact;
+    private String title;
+    private Location location;
 }

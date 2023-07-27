@@ -11,7 +11,7 @@ public class WbMapperTest {
 
     @Test
     public void test() {
-        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("test.xlsx");
+        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("AM_Schedule_test.xlsx");
         try (ReadableWorkbook wb = new ReadableWorkbook(resourceAsStream)) {
             var eventSheet = wb.getSheet(0).get();
             var weekSheet = wb.getSheet(1).get();

@@ -7,13 +7,16 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
 import org.junit.jupiter.api.Test;
-import ru.am.scheduleapp.model.document.v2.EventDocumentV2;
-import ru.am.scheduleapp.model.document.v2.Location;
+import ru.am.scheduleapp.model.document.v2.*;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+
 
 @Slf4j
 public class WbMapperTest {
@@ -40,6 +43,10 @@ public class WbMapperTest {
         var roomsSheet = wb.getSheet(4).get();
 
         List<Location> locations = toLocationList(locationSheet);
+        List<EventManager> managers = toEventManagerList(eventManagerSheet);
+        List<Week> weeks = toWeekList(weekSheet);
+        List<Room> rooms = toRoomList(roomsSheet);
+        List<EventDocumentV2> events = toEventList(eventSheet, managers, locations, weeks);
         //TODO остальные листы
         System.out.println(locations);
 
@@ -70,6 +77,93 @@ public class WbMapperTest {
                     );
                 }
         ).toList();
+    }
+
+    @SneakyThrows
+    private List<EventManager> toEventManagerList(Sheet eventManagerSheet) {
+        return eventManagerSheet.read().stream().filter(this::canOperate).skip(1).map(row -> {
+            var num = (BigDecimal) row.getCell(0).getValue();
+            var managerName = getRawOrNull(row, 1);
+            var image = getRawOrNull(row, 2);
+            var managerDescription = getRawOrNull(row, 3);
+            var managerContact = getRawOrNull(row, 4);
+            return new EventManager(
+                    num.intValue(), managerName, image, managerDescription, managerContact
+            );
+        }).toList();
+    }
+
+    @SneakyThrows
+    private List<Week> toWeekList(Sheet weekSheet) {
+        return weekSheet.read().stream().filter(this::canOperate).skip(1).map(row -> {
+            var num = (BigDecimal) row.getCell(0).getValue();
+            var quote = getRawOrNull(row, 1);
+            var notes = getRawOrNull(row, 2);
+            var dateFrom = LocalDate.parse(getRawOrNull(row, 3));
+            var dateTo = LocalDate.parse(getRawOrNull(row, 4));
+            return new Week(
+                    num.intValue(), quote, notes, dateFrom, dateTo
+            );
+        }).toList();
+    }
+
+    @SneakyThrows
+    private List<Room> toRoomList(Sheet roomsSheet) {
+        return roomsSheet.read().stream().filter(this::canOperate).skip(1).map(row -> {
+            var id = (BigDecimal) row.getCell(0).getValue();
+            var title = getRawOrNull(row, 1);
+            var location = getRawOrNull(row, 2);
+            return new Room(id.intValue(), title, location);
+        }).toList();
+    }
+
+    @SneakyThrows
+    private List<EventDocumentV2> toEventList(Sheet eventSheet, List<EventManager> managers,
+                                              List<Location> locations, List<Week> weeks) {
+        return eventSheet.read().stream().filter(this::canOperate).skip(1).map(row -> {
+            var id = getRawOrNull(row, 0);
+            var num = (BigDecimal) row.getCell(1).getValue();
+            var title = getRawOrNull(row, 2);
+
+            var locId = getRawOrNull(row, 3);
+            var locIdNum = Integer.parseInt(locId.split("_")[1]);
+            var location = locations.stream()
+                    .filter(l -> l.getId() == locIdNum)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Location not found"));
+
+            var date = LocalDate.parse(getRawOrNull(row, 4));
+            var startTime = LocalTime.parse(getRawOrNull(row, 5));
+            var endTime = LocalTime.parse(getRawOrNull(row, 6));
+            var zoneId = ZoneId.of(getRawOrNull(row, 7));
+            var description = getRawOrNull(row, 8);
+
+            var managerId = getRawOrNull(row, 9);
+            var managerIdNum = Integer.parseInt(managerId.split("_")[1]);
+            var manager = managers.stream()
+                    .filter(m -> m.getNum() == managerIdNum)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Manager not found"));
+
+            var paid = Integer.parseInt(getRawOrNull(row, 10)) == 1;
+            var paymentAmount = new BigDecimal(getRawOrNull(row, 11));
+            var boldAm = Integer.parseInt(getRawOrNull(row, 12)) == 1;
+            var boldUm = Integer.parseInt(getRawOrNull(row, 13)) == 1;
+            var suitableUm = Integer.parseInt(getRawOrNull(row, 14)) == 1;
+            var publish = Integer.parseInt(getRawOrNull(row, 15)) == 1;
+
+            var weekId = getRawOrNull(row, 16);
+            var weekIdNum = Integer.parseInt(weekId.split("_")[1]);
+            Week week = weeks.stream()
+                    .filter(w -> w.getNum() == weekIdNum)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Week not found"));
+
+            return new EventDocumentV2(
+                    id, num.intValue(), title, location, date, startTime, endTime, zoneId, description,
+                    manager, paid, paymentAmount, boldAm, boldUm, suitableUm, publish, week
+            );
+        }).toList();
     }
 
     private String getRawOrNull(Row row, int i) {

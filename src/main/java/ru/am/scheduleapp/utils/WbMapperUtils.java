@@ -5,6 +5,8 @@ import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 import ru.am.scheduleapp.model.document.v2.*;
 
 import java.io.IOException;
@@ -22,7 +24,12 @@ import java.util.UUID;
 public class WbMapperUtils {
     public static final String MSC_ZONE_STR = "+3";
 
-    public static List<EventDocumentV2> readFromWb(ReadableWorkbook wb) throws IOException {
+    public static boolean isActualWeek(WeekDocumentV2 weekDocumentV2) {
+        var now = LocalDate.now();
+        return weekDocumentV2.getDateTo().isAfter(now) || weekDocumentV2.getDateFrom().isEqual(now);
+    }
+
+    public static Tuple2<List<EventDocumentV2>, List<WeekDocumentV2>> readFromWb(ReadableWorkbook wb) throws IOException {
         var eventSheet = wb.getSheet(0).get();
         var weekSheet = wb.getSheet(1).get();
         var eventManagerSheet = wb.getSheet(2).get();
@@ -39,7 +46,7 @@ public class WbMapperUtils {
         System.out.println(locations);
 
 //        fillEventsForWeek(weeks.get(0), events)
-        return List.of();
+        return Tuples.of(events, weeks);
     }
 
     public static List<WeekDocumentV2> toWeekList(Sheet weekSheet) throws IOException {

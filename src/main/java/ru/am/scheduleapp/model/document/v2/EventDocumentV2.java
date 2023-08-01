@@ -3,6 +3,7 @@ package ru.am.scheduleapp.model.document.v2;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
@@ -16,6 +17,8 @@ import java.time.ZoneId;
 public class EventDocumentV2 {
     @Id
     private String id;
+
+    @Indexed(unique = true)
     private Integer num;
     private String title;
     private Location location;
@@ -31,5 +34,5 @@ public class EventDocumentV2 {
     private boolean boldUm;
     private boolean suitableUm;
     private boolean publish;
-    private Week week;
+
 }

@@ -1,13 +1,16 @@
 package ru.am.scheduleapp.service.v2;
 
-import lombok.AllArgsConstructor;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import ru.am.scheduleapp.model.document.v2.EventDocumentV2;
 import ru.am.scheduleapp.model.document.v2.WeekDocumentV2;
@@ -23,11 +26,21 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class SheetsService {
     private final EventDocumentV2Repository eventDocumentV2Repository;
     private final WeekDocumentV2Repository weekDocumentV2Repository;
+
+    @Value("ru.am.cheduleapp.use-date-filter")
+    private String useDateFilterProp;
+
+    private boolean useDateFilter;
+
+    @PostConstruct
+    public void init() {
+        useDateFilter = Boolean.getBoolean(useDateFilterProp);
+    }
 
     public Mono<ResponseEntity<String>> operateNew(Mono<FilePart> file) {
         final AtomicReference<String> loc = new AtomicReference<String>();
@@ -68,22 +81,34 @@ public class SheetsService {
 
     private Mono<Void> updateEvents(List<EventDocumentV2> events) {
         var now = LocalDate.now();
-        return Flux.fromIterable(events)
+        List<EventDocumentV2> filtered = useDateFilter ? events.stream()
                 .filter(it -> it.getDate().isEqual(now) || it.getDate().isAfter(now))
+                .toList() : events;
+        if (filtered.isEmpty()) return Mono.just("").then();
+
+        return Flux.fromIterable(filtered)
+                .publishOn(Schedulers.boundedElastic())
                 .flatMap(it -> eventDocumentV2Repository.findByNum(it.getNum())
                         .switchIfEmpty(Mono.just(it)).doOnNext(next -> log.info("no event {} was found", next)))
                 .flatMap(eventDocumentV2Repository::save)
+                .doOnNext(it -> log.info("{} saved", it))
+                .doOnError(err -> log.error(err.getMessage(), err))
                 .then();
     }
 
     private Mono<Void> updateWeeks(List<WeekDocumentV2> weeks) {
+        List<WeekDocumentV2> filtered = useDateFilter ? weeks.stream().filter(WbMapperUtils::isActualWeek).toList() : weeks;
+        if (filtered.isEmpty()) return Mono.just("").then();
+
         return Flux.fromIterable(weeks)
-                .filter(WbMapperUtils::isActualWeek)
+                .publishOn(Schedulers.boundedElastic())
                 .flatMap(it ->
                         weekDocumentV2Repository.findWeekDocumentV2ByDateFromAndDateTo(it.getDateFrom(), it.getDateTo())
                                 .switchIfEmpty(Mono.just(it).doOnNext(newWeek -> log.info("no week {} was found", it)))
                 )
                 .flatMap(weekDocumentV2Repository::save)
+                .doOnNext(it -> log.info("{} saved", it))
+                .doOnError(err -> log.error(err.getMessage(), err))
                 .then();
     }
 

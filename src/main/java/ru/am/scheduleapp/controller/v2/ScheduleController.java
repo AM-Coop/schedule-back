@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import ru.am.scheduleapp.model.document.v2.EventDocumentV2;
+import ru.am.scheduleapp.model.document.v2.WeekDocumentV2;
 import ru.am.scheduleapp.service.v2.ScheduleService;
 
 import java.util.Map;
@@ -19,7 +19,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @GetMapping("/schedule")
-    public Flux<EventDocumentV2> getSchedule(
+    public Flux<WeekDocumentV2> getSchedule(
             @RequestParam Map<String, String> params
     ) {
 

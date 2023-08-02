@@ -2,6 +2,7 @@ package ru.am.scheduleapp.model.document.v2;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Document
 public class WeekDocumentV2 {
@@ -25,5 +27,5 @@ public class WeekDocumentV2 {
     private LocalDate dateTo;
 
     @Transient
-    private List<EventDocumentV2> eventDocumentV2List;
+    private List<EventDocumentV2> eventDocumentV2List = List.of();
 }

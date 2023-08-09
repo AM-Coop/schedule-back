@@ -1,38 +1,52 @@
 package ru.am.scheduleapp.model.document.v2;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.UUID;
 
-@Document
+//@Document
 @AllArgsConstructor
-@Data
-public class EventDocumentV2 {
-    @Id
-    private String id;
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+public class Event {
 
-    @Indexed(unique = true)
+    @jakarta.persistence.Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false)
+    private UUID id;
+
+    //    @Indexed(unique = true)
     private Integer num;
     private String title;
+
+    @ManyToOne
     private Location location;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
     private ZoneId timeZone;
     private String description;
-    private EventManager manager;
+
+    @ManyToOne
+    private Manager manager;
     private boolean paid;
     private BigDecimal paymentAmount;
     private boolean boldAm;
     private boolean boldUm;
     private boolean suitableUm;
     private boolean publish;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Week week;
 
 }

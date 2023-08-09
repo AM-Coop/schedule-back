@@ -4,10 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
-import org.dhatim.fastexcel.reader.Sheet;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
-import ru.am.scheduleapp.model.document.v2.*;
+import ru.am.scheduleapp.model.document.v2.Week;
+import ru.am.scheduleapp.model.wb.WbEvent;
+import ru.am.scheduleapp.model.wb.WbEventManager;
+import ru.am.scheduleapp.model.wb.WbLocation;
+import ru.am.scheduleapp.model.wb.WbRoom;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -16,7 +17,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,66 +24,45 @@ import java.util.UUID;
 public class WbMapperUtils {
     public static final String MSC_ZONE_STR = "+3";
 
-    public static boolean isActualWeek(WeekDocumentV2 weekDocumentV2) {
+    public static boolean isActualWeek(Week week) {
         var now = LocalDate.now();
-        return weekDocumentV2.getDateTo().isAfter(now) || weekDocumentV2.getDateFrom().isEqual(now);
+        return week.getDateTo().isAfter(now) || week.getDateFrom().isEqual(now);
     }
 
-    public static Tuple2<List<EventDocumentV2>, List<WeekDocumentV2>> readFromWb(ReadableWorkbook wb) throws IOException {
-        var eventSheet = wb.getSheet(0).get();
+    public static List<Week> readWeekList(ReadableWorkbook wb) throws IOException {
         var weekSheet = wb.getSheet(1).get();
-        var eventManagerSheet = wb.getSheet(2).get();
-        var locationSheet = wb.getSheet(3).get();
-        var roomsSheet = wb.getSheet(4).get();
-
-        List<Location> locations = toLocationList(locationSheet);
-        List<EventManager> managers = toEventManagerList(eventManagerSheet);
-        List<Room> rooms = toRoomList(roomsSheet);
-        List<EventDocumentV2> events = toEventList(eventSheet, managers, locations);
-        List<WeekDocumentV2> weeks = toWeekList(weekSheet);
-
-        //TODO остальные листы
-        System.out.println(locations);
-
-//        fillEventsForWeek(weeks.get(0), events)
-        return Tuples.of(events, weeks);
-    }
-
-    public static List<WeekDocumentV2> toWeekList(Sheet weekSheet) throws IOException {
         return weekSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
             var num = getNumWithDefault(row, 0);
             var quote = getRawOrNull(row, 1);
             var notes = getRawOrNull(row, 2);
             var dateFrom = getLocalDateOrNull(row, 3);
             var dateTo = getLocalDateOrNull(row, 4);
-            return new WeekDocumentV2(
-                    UUID.randomUUID().toString(), num.intValue(), quote, notes, dateFrom, dateTo, List.of()
+            return new Week(
+                    UUID.randomUUID(), num.intValue(), quote, notes, dateFrom, dateTo, List.of()
             );
         }).toList();
     }
 
-    public static List<Room> toRoomList(Sheet roomsSheet) throws IOException {
+    public static List<WbRoom> readRoomList(ReadableWorkbook wb) throws IOException {
+        var roomsSheet = wb.getSheet(4).get();
         return roomsSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
             var id = (BigDecimal) row.getCell(0).getValue();
             var title = getRawOrNull(row, 1);
             var location = getRawOrNull(row, 2);
-            return new Room(id.intValue(), title, location);
+            return new WbRoom(id.intValue(), title, location);
         }).toList();
     }
 
-    public static List<EventDocumentV2> toEventList(Sheet eventSheet, List<EventManager> managers,
-                                                    List<Location> locations) throws IOException {
+    public static List<WbEvent> readEventList(ReadableWorkbook wb) throws IOException {
+        var eventSheet = wb.getSheet(0).get();
+
         return eventSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
             var num = getNumWithDefault(row, 0).intValue();
 //            var num = getNumWithDefault(row, 1);
             var title = getRawOrNull(row, 1);
 
             var locName = getRawOrNull(row, 2);
-//            var locIdNum = Integer.parseInt(locId.split("_")[1]);
-            var location = locations.stream()
-                    .filter(l -> Objects.equals(l.getName(), locName))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Location not found: " + locName));
+
 
             var date = getLocalDateOrNull(row, 3);
             var startTime = getLocalTimeOrNull(row, 4);
@@ -94,10 +73,7 @@ public class WbMapperUtils {
 
             var managerName = getRawOrNull(row, 8);
 //            var managerIdNum = Integer.parseInt(managerId.split("_")[1]);
-            var manager = managers.stream()
-                    .filter(m -> Objects.equals(m.getManagerName(), managerName))
-                    .findFirst()
-                    .orElse(null);
+
 
             var paid = getBooleanWithDefault(row, 9);
 
@@ -112,34 +88,30 @@ public class WbMapperUtils {
             var publish = getBooleanWithDefault(row, 15);
 
             var weekId = getRawOrNull(row, 15); // TODO
-//            System.out.println();
-//            var weekIdNum = Integer.parseInt(weekId.split("_")[1]);
-//            Week week = weeks.stream()
-//                    .filter(w -> w.getNum() == weekIdNum)
-//                    .findFirst()
-//                    .orElseThrow(() -> new RuntimeException("Week not found"));
 
-            return new EventDocumentV2(
-                    UUID.randomUUID().toString(), num, title, location, date, startTime, endTime, zoneId, description,
-                    manager, paid, paymentAmount, boldAm, boldUm, suitableUm, publish
+            return new WbEvent(
+                    num, title, locName, date, startTime, endTime, zoneId, description,
+                    managerName, paid, paymentAmount, boldAm, boldUm, suitableUm, publish
             );
         }).toList();
     }
 
-    public static List<EventManager> toEventManagerList(Sheet eventManagerSheet) throws IOException {
+    public static List<WbEventManager> readEventManagerList(ReadableWorkbook wb) throws IOException {
+        var eventManagerSheet = wb.getSheet(2).get();
         return eventManagerSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
-            var num = getNumWithDefault(row, 0).intValue();
-            var managerName = getRawOrNull(row, 1);
-            var image = getRawOrNull(row, 2);
-            var managerDescription = getRawOrNull(row, 3);
-            var managerContact = getRawOrNull(row, 4);
-            return new EventManager(
-                    num, managerName, image, managerDescription, managerContact
+            var id = getNumWithDefault(row, 0).intValue();
+            var name = getRawOrNull(row, 1);
+            var photo = getRawOrNull(row, 2);
+            var description = getRawOrNull(row, 3);
+            var contact = getRawOrNull(row, 4);
+            return new WbEventManager(
+                    id, name, photo, description, contact
             );
         }).toList();
     }
 
-    public static List<Location> toLocationList(Sheet locationSheet) throws IOException {
+    public static List<WbLocation> readLocationList(ReadableWorkbook wb) throws IOException {
+        var locationSheet = wb.getSheet(3).get();
         return locationSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
                     var id = (BigDecimal) row.getCell(0).getValue();
                     var name = getRawOrNull(row, 1);
@@ -148,8 +120,8 @@ public class WbMapperUtils {
                     var rout = getRawOrNull(row, 4);
                     var icon = getRawOrNull(row, 5);
                     var description = getRawOrNull(row, 6);
-                    return new Location(
-                            id.intValue(), name, timeZone, address, rout, icon, description
+                    return new WbLocation(
+                            id.intValue(), name, timeZone, address, rout, "region todo", icon, description
                     );
                 }
         ).toList();

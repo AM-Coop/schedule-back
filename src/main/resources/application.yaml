@@ -1,19 +1,21 @@
 spring:
   application:
     name: am-schedule
-  data:
-    mongodb:
-      authentication-database: admin
-      password: pass123
-      username: mongofiboadmin
-      host: localhost
-      port: 27017
-      database: schedule
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: 'password'
+    username: 'postgres'
+    url: 'jdbc:postgresql://localhost:5432/schedule'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 ru:
   am:
     scheduleapp:
       use-date-filter: false
+      wb-dir-location: '/tmp/wb/'
 
 server:
   port: 8081

@@ -1,115 +1,181 @@
 package ru.am.scheduleapp.service.v2;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
-import ru.am.scheduleapp.model.document.v2.EventDocumentV2;
-import ru.am.scheduleapp.model.document.v2.WeekDocumentV2;
-import ru.am.scheduleapp.repository.v2.EventDocumentV2Repository;
-import ru.am.scheduleapp.repository.v2.WeekDocumentV2Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import ru.am.scheduleapp.configuration.properties.ScheduleAppProps;
+import ru.am.scheduleapp.model.document.v2.Event;
+import ru.am.scheduleapp.model.document.v2.Location;
+import ru.am.scheduleapp.model.document.v2.Manager;
+import ru.am.scheduleapp.model.document.v2.Week;
+import ru.am.scheduleapp.model.wb.WbEvent;
+import ru.am.scheduleapp.model.wb.WbEventManager;
+import ru.am.scheduleapp.model.wb.WbLocation;
+import ru.am.scheduleapp.model.wb.WbRoom;
+import ru.am.scheduleapp.repository.v2.*;
 import ru.am.scheduleapp.utils.WbMapperUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SheetsService {
-    private final EventDocumentV2Repository eventDocumentV2Repository;
-    private final WeekDocumentV2Repository weekDocumentV2Repository;
+    private final EventRepository eventRepository;
+    private final WeekRepository weekRepository;
 
-    @Value("ru.am.cheduleapp.use-date-filter")
-    private String useDateFilterProp;
+    private final LocationRepository locationRepository;
 
-    private boolean useDateFilter;
+    private final ManagerRepository managerRepository;
 
-    @PostConstruct
-    public void init() {
-        useDateFilter = Boolean.getBoolean(useDateFilterProp);
+    private final RoomRepository roomRepository;
+
+    private final ScheduleAppProps scheduleAppProps;
+
+//    private boolean useDateFilter;
+
+//    @PostConstruct
+//    public void init() {
+//        useDateFilter = Boolean.getBoolean(useDateFilterProp);
+//    }
+
+    public void operateNew(MultipartFile file) throws IOException {
+        log.info("new file {}", file.getName());
+        var path = saveFile(file);
+        try (FileInputStream fis = new FileInputStream(path);
+             ReadableWorkbook wb = new ReadableWorkbook(fis)) {
+            operateWb(wb);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
     }
 
-    public Mono<ResponseEntity<String>> operateNew(Mono<FilePart> file) {
-        final AtomicReference<String> loc = new AtomicReference<String>();
-        return file.doOnNext(f -> System.out.println(f.filename()))
-                .flatMap(f -> saveFile(f, loc))
-                .then(operateFile(loc))
-                .thenReturn(ResponseEntity.ok("ok"));
+    private String saveFile(MultipartFile f) throws IOException {
+        String pathname = scheduleAppProps.getWbDirLocation() + f.getOriginalFilename();
+        File dest = new File(pathname);
+        f.transferTo(dest);
+        return pathname;
     }
 
-    private Mono<String> operateFile(AtomicReference<String> loc) {
-        return Mono.defer(() -> {
-            try (FileInputStream fis = new FileInputStream(loc.get());
-                 ReadableWorkbook wb = new ReadableWorkbook(fis)) {
-                return operateWb(wb).thenReturn("ok");
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-            return Mono.just("ok");
+    private void operateWb(ReadableWorkbook wb) throws IOException {
+//        Pair<List<Event>, List<Week>> tuple = WbMapperUtils.readFromWb(wb);
+//        updateEvents(tuple.getFirst());
+//        updateWeeks(tuple.getSecond());
+        updateRooms(WbMapperUtils.readRoomList(wb)); // TODO
+        updateLocations(WbMapperUtils.readLocationList(wb));
+        updateManagers(WbMapperUtils.readEventManagerList(wb));
+        updateWeeks(WbMapperUtils.readWeekList(wb));
+
+        updateEvents(WbMapperUtils.readEventList(wb));
+
+    }
+
+    @Transactional
+    public void updateManagers(List<WbEventManager> wbEventManagers) {
+        wbEventManagers.forEach(manager -> {
+            Manager entity = managerRepository.findByNum(manager.getId()).orElseGet(() -> {
+                log.info("creating new manager {}", manager);
+                return new Manager();
+            });
+            entity.setName(manager.getName());
+            entity.setContact(manager.getContact());
+            entity.setDescription(manager.getDescription());
+            entity.setPhoto(manager.getPhoto());
+            entity.setNum(manager.getId());
+
+            managerRepository.save(entity);
         });
     }
 
-    private Mono<Void> saveFile(FilePart f, AtomicReference<String> loc) {
-        String pathname = "data/" + f.filename();
-        loc.set(pathname);
-        File dest = new File(pathname);
-        try {
-            dest.createNewFile(); //todo in non blocking way
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        return f.transferTo(dest);
+    private void updateRooms(List<WbRoom> wbRooms) {
+        wbRooms.forEach(room -> {
+            // todo
+        });
     }
 
-    private Mono<Void> operateWb(ReadableWorkbook wb) throws IOException {
-        Tuple2<List<EventDocumentV2>, List<WeekDocumentV2>> tuple = WbMapperUtils.readFromWb(wb);
-        return updateEvents(tuple.getT1()).zipWith(updateWeeks(tuple.getT2())).then();
+    @Transactional
+    public void updateLocations(List<WbLocation> wbLocations) {
+        wbLocations.forEach(location -> {
+            Location entity = locationRepository.findByNum(location.getNum()).orElseGet(() -> {
+                log.info("creating new location {}", location);
+                return new Location();
+            });
+            entity.setNum(location.getNum());
+            entity.setName(location.getName());
+            entity.setIcon(location.getIcon());
+            entity.setRout(location.getRout());
+            entity.setRegion(location.getRegion());
+            entity.setAddress(location.getAddress());
+            entity.setTimeZone(location.getTimeZone());
+            entity.setDescription(location.getDescription());
+            locationRepository.save(entity);
+        });
     }
 
-    private Mono<Void> updateEvents(List<EventDocumentV2> events) {
-        var now = LocalDate.now();
-        List<EventDocumentV2> filtered = useDateFilter ? events.stream()
-                .filter(it -> it.getDate().isEqual(now) || it.getDate().isAfter(now))
-                .toList() : events;
-        if (filtered.isEmpty()) return Mono.just("").then();
+    @Transactional
+    public void updateEvents(List<WbEvent> events) {
+        events.forEach(event -> {
+            Event entity = eventRepository.findByNum(event.getNum()).orElseGet(() -> {
+                log.info("new event: {}", event);
+                return new Event();
+            });
+            entity.setNum(event.getNum());
+            entity.setDate(event.getDate());
+            entity.setDescription(event.getDescription());
+            entity.setPaid(event.isPaid());
+            entity.setTimeZone(event.getTimeZone());
+            entity.setBoldAm(event.isBoldAm());
+            entity.setEndTime(event.getEndTime());
+            entity.setPaymentAmount(event.getPaymentAmount());
+            entity.setPublish(event.isPublish());
+            entity.setStartTime(event.getStartTime());
+            entity.setSuitableUm(event.isSuitableUm());
+            entity.setTitle(event.getTitle());
+            entity.setBoldUm(event.isBoldUm());
 
-        return Flux.fromIterable(filtered)
-                .publishOn(Schedulers.boundedElastic())
-                .flatMap(it -> eventDocumentV2Repository.findByNum(it.getNum())
-                        .switchIfEmpty(Mono.just(it)).doOnNext(next -> log.info("no event {} was found", next)))
-                .flatMap(eventDocumentV2Repository::save)
-                .doOnNext(it -> log.info("{} saved", it))
-                .doOnError(err -> log.error(err.getMessage(), err))
-                .then();
+//            managerRepository.findByName(ev)
+            if (entity.getManager() == null) {
+                managerRepository.findByName(event.getManagerName()).ifPresent(entity::setManager);
+            }
+
+            if (entity.getLocation() == null) {
+                locationRepository.findByName(event.getLocationName()).ifPresent(entity::setLocation);
+            }
+
+            if (entity.getWeek() == null) {
+                weekRepository.findByEventDate(event.getDate()).ifPresent(entity::setWeek);
+            }
+
+
+            eventRepository.save(entity);
+
+        });
     }
 
-    private Mono<Void> updateWeeks(List<WeekDocumentV2> weeks) {
-        List<WeekDocumentV2> filtered = useDateFilter ? weeks.stream().filter(WbMapperUtils::isActualWeek).toList() : weeks;
-        if (filtered.isEmpty()) return Mono.just("").then();
+    @Transactional
+    public void updateWeeks(List<Week> weeks) {
+        weeks.forEach(week -> {
+            Week entity = weekRepository.findWeekByDateFromAndDateTo(week.getDateFrom(), week.getDateTo()).orElseGet(() -> {
+                log.info("new week {}", week);
+                return new Week();
+            });
+            entity.setNotes(week.getNotes());
+            entity.setQuote(week.getQuote());
+            entity.setDateFrom(week.getDateFrom());
+            entity.setDateTo(week.getDateTo());
+            weekRepository.save(entity);
 
-        return Flux.fromIterable(weeks)
-                .publishOn(Schedulers.boundedElastic())
-                .flatMap(it ->
-                        weekDocumentV2Repository.findWeekDocumentV2ByDateFromAndDateTo(it.getDateFrom(), it.getDateTo())
-                                .switchIfEmpty(Mono.just(it).doOnNext(newWeek -> log.info("no week {} was found", it)))
-                )
-                .flatMap(weekDocumentV2Repository::save)
-                .doOnNext(it -> log.info("{} saved", it))
-                .doOnError(err -> log.error(err.getMessage(), err))
-                .then();
+//            List<Event> events = eventRepository.findAllByDateBetween(week.getDateFrom(), week.getDateTo());
+//            week.getEventList().clear();
+//            week.getEventList().addAll(events);
+        });
     }
 
 

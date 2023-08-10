@@ -83,9 +83,8 @@ public class AppSecurityConfig {
                 .requiresChannel(channel ->
                         channel.anyRequest().requiresSecure())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/token/refresh").permitAll()
-                        .requestMatchers("/admin").hasAuthority("SCOPE_adm")
+                        .requestMatchers("/login", "/token/refresh", "/v2/schedule").permitAll()
+                        .requestMatchers("/admin", "/sheet/upload").hasAuthority("SCOPE_adm")
                         .requestMatchers("/user").hasAuthority("SCOPE_usr")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

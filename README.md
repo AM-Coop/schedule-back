@@ -18,4 +18,7 @@ openssl pkcs8 -topk8 -in private.pem -nocrypt -out private_key.pem
 
 Generating a Self-Signed Certificate
 
-keytool -genkeypair -alias schedule -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore schedule.p12 -validity 3650
+keytool -genkey -alias am -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650
+
+keytool -genkey -alias am -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore-prod.p12 -validity 3650
+

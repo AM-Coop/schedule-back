@@ -1,4 +1,4 @@
-package ru.am.scheduleapp.model.document.v2;
+package ru.am.scheduleapp.model.entity.v2;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

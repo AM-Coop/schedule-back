@@ -3,7 +3,7 @@ package ru.am.scheduleapp.repository.v2;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import ru.am.scheduleapp.model.document.v2.Week;
+import ru.am.scheduleapp.model.entity.v2.Week;
 
 import java.time.LocalDate;
 import java.util.Optional;

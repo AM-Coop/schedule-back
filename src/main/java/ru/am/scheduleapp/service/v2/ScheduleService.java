@@ -2,7 +2,7 @@ package ru.am.scheduleapp.service.v2;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.am.scheduleapp.model.document.v2.Week;
+import ru.am.scheduleapp.model.entity.v2.Week;
 import ru.am.scheduleapp.repository.v2.EventRepository;
 import ru.am.scheduleapp.repository.v2.WeekRepository;
 

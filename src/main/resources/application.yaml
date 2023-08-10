@@ -10,6 +10,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    generate-ddl: true
 
 ru:
   am:
@@ -17,5 +18,15 @@ ru:
       use-date-filter: false
       wb-dir-location: '/tmp/wb/'
 
+
+rsa:
+  private-key: 'classpath:certs/private_key.pem'
+  public-key: 'classpath:certs/public_key.pem'
+
 server:
-  port: 8081
+  port: 443
+  ssl:
+    key-store: 'classpath:keystore/keystore.p12'
+    key-store-password: cb92b467-1d2a-403d-9a4f-c34e1575eb83
+    keyStoreType: PKCS12
+    keyAlias: am

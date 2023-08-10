@@ -1,4 +1,4 @@
-package ru.am.scheduleapp.model.document.v2;
+package ru.am.scheduleapp.model.entity.v2;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-public class Manager {
+public class Location {
 
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,7 +28,11 @@ public class Manager {
 
     @Column(unique = true)
     private String name;
-    private String photo;
+
+    private String region;
+    private String timeZone;
+    private String address;
+    private String rout;
+    private String icon;
     private String description;
-    private String contact;
 }

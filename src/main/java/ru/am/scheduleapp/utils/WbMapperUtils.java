@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
-import ru.am.scheduleapp.model.document.v2.Week;
+import ru.am.scheduleapp.model.entity.v2.Week;
 import ru.am.scheduleapp.model.wb.WbEvent;
 import ru.am.scheduleapp.model.wb.WbEventManager;
 import ru.am.scheduleapp.model.wb.WbLocation;

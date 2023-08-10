@@ -3,7 +3,7 @@ package ru.am.scheduleapp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.am.scheduleapp.model.document.v2.Week;
+import ru.am.scheduleapp.model.entity.v2.Week;
 import ru.am.scheduleapp.utils.WbMapperUtils;
 
 import java.time.LocalDate;

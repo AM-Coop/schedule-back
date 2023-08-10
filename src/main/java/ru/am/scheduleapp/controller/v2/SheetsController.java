@@ -18,7 +18,7 @@ public class SheetsController {
 
     private final SheetsService sheetsService;
 
-    @PostMapping("sheet/upload")
+    @PostMapping("/sheet/upload")
     @SneakyThrows
     public ResponseEntity<BasicResponse> upload(@RequestPart MultipartFile file) {
         sheetsService.operateNew(file);

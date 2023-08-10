@@ -1,4 +1,4 @@
-package ru.am.scheduleapp.controller.v2;
+package ru.am.scheduleapp.controller.sheet;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;

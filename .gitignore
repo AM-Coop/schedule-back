@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 data/
+src/main/resources/certs/
+src/main/resources/keystore/
+
 
 ### IntelliJ IDEA ###
 .idea

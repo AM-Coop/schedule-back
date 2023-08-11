@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.am.scheduleapp.model.entity.v2.Week;
+import ru.am.scheduleapp.model.dto.v2.WeekResponseDto;
 import ru.am.scheduleapp.service.v2.ScheduleService;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @GetMapping("/schedule")
-    public ResponseEntity<List<Week>> getSchedule(
+    public ResponseEntity<List<WeekResponseDto>> getSchedule(
             @RequestParam Map<String, String> params
     ) {
 

@@ -1,11 +1,14 @@
 package ru.am.scheduleapp.service.v2;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import ru.am.scheduleapp.configuration.properties.ScheduleAppProps;
 import ru.am.scheduleapp.model.entity.v2.Event;
 import ru.am.scheduleapp.model.entity.v2.Location;
@@ -20,8 +23,13 @@ import ru.am.scheduleapp.utils.WbMapperUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +48,38 @@ public class SheetsService {
 
 //    private boolean useDateFilter;
 
-//    @PostConstruct
-//    public void init() {
-//        useDateFilter = Boolean.getBoolean(useDateFilterProp);
-//    }
+    @PostConstruct
+    public void init() {
+        Flux.interval(Duration.ofSeconds(1))
+                .publishOn(Schedulers.parallel())
+                .doOnNext(next -> {
+                    File dir = new File(scheduleAppProps.getWbDirLocation());
+
+                    List<File> files = Optional.ofNullable(dir.listFiles()).map(Arrays::asList).orElse(List.of());
+                    List<File> toDelete = new ArrayList<>();
+                    files.stream().filter(f -> f.getName().endsWith(".xlsx")).forEach(f -> {
+                        log.info("operate {}", f.getName());
+                        try (FileInputStream fis = new FileInputStream(f.getAbsolutePath());
+                             ReadableWorkbook wb = new ReadableWorkbook(fis)) {
+                            operateWb(wb);
+                            writeResults("ok");
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                            writeResults(e.getMessage());
+                        } finally {
+                            toDelete.add(f);
+                        }
+
+
+                    });
+                    for (File file : toDelete) {
+                        boolean delete = file.delete();
+                        log.info("deleted");
+                    }
+                })
+                .doOnError(err -> log.error("err -> {}", err.getMessage(), err))
+                .subscribe();
+    }
 
     public void operateNew(MultipartFile file) throws IOException {
         log.info("new file {}", file.getName());
@@ -53,6 +89,29 @@ public class SheetsService {
             operateWb(wb);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+
+    }
+
+    private void writeResults(String msg) {
+        String pathname = scheduleAppProps.getWbDirLocation() + "result.txt";
+        File file = new File(pathname);
+
+        try {
+            file.delete();
+            file.createNewFile();
+        } catch (Exception e) {
+            log.error("err -> {}", e.getMessage(), e);
+
+        }
+
+        try (var fos = new FileOutputStream(file)) {
+            fos.write(msg.getBytes());
+            fos.flush();
+            log.info("res saved: {}", msg);
+        } catch (Exception e) {
+            log.error("err -> {}", e.getMessage(), e);
+            writeResults(e.getMessage());
         }
 
     }

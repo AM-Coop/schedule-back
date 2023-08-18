@@ -34,4 +34,9 @@ public class ScheduleService {
         weekRepository.findAll().forEach(w -> res.add(DtoMapperUtils.mapFromWeekEntity(w)));
         return res;
     }
+
+    public void refreshFromGoogleSheets() {
+
+        // TODO
+    }
 }

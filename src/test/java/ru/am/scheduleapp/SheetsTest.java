@@ -13,23 +13,12 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import org.dhatim.fastexcel.reader.Sheet;
 import org.junit.jupiter.api.Test;
-import ru.am.scheduleapp.model.entity.v2.Week;
-import ru.am.scheduleapp.model.wb.WbEvent;
-import ru.am.scheduleapp.model.wb.WbEventManager;
-import ru.am.scheduleapp.model.wb.WbLocation;
-import ru.am.scheduleapp.model.wb.WbRoom;
-import ru.am.scheduleapp.utils.WbMapperUtils;
-
-import static ru.am.scheduleapp.utils.WbMapperUtils.*;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class SheetsTest {
     private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
@@ -101,85 +90,5 @@ public class SheetsTest {
                 System.out.printf("%s, %s\n", row.get(0), row.get(4));
             }
         }
-    }
-
-    private List<Week> toWeekList(Sheet weekSheet) throws IOException {
-        return weekSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
-            var num = getNumWithDefault(row, 0);
-            var quote = getRawOrNull(row, 1);
-            var notes = getRawOrNull(row, 2);
-            var dateFrom = getLocalDateOrNull(row, 3);
-            var dateTo = getLocalDateOrNull(row, 4);
-            return new Week(
-                    UUID.randomUUID(), num.intValue(), quote, notes, dateFrom, dateTo, List.of()
-            );
-        }).toList();
-    }
-
-    private List<WbEventManager> toEventManagerList(Sheet eventManagerSheet) throws IOException {
-        return eventManagerSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
-            var id = getNumWithDefault(row, 0).intValue();
-            var name = getRawOrNull(row, 1);
-            var photo = getRawOrNull(row, 2);
-            var description = getRawOrNull(row, 3);
-            var contact = getRawOrNull(row, 4);
-            return new WbEventManager(
-                    id, name, photo, description, contact
-            );
-        }).toList();
-    }
-
-    private List<WbLocation> toLocationList(Sheet locationSheet) throws IOException {
-        return locationSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
-            var id = (BigDecimal) row.getCell(0).getValue();
-            var name = getRawOrNull(row, 1);
-            var timeZone = getRawOrNull(row, 2);
-            var address = getRawOrNull(row, 3);
-            var rout = getRawOrNull(row, 4);
-            var icon = getRawOrNull(row, 5);
-            var description = getRawOrNull(row, 6);
-            return new WbLocation(
-                    id.intValue(), name, timeZone, address, rout, "region todo", icon, description
-            );
-        }).toList();
-    }
-
-    private List<WbRoom> toRoomList(Sheet roomsSheet) throws IOException {
-        return roomsSheet.read().stream().filter(WbMapperUtils::canOperate).skip(1).map(row -> {
-            var id = (BigDecimal) row.getCell(0).getValue();
-            var title = getRawOrNull(row, 1);
-            var location = getRawOrNull(row, 2);
-            return new WbRoom(id.intValue(), title, location);
-        }).toList();
-    }
-
-    private List<WbEvent> toEventList(Sheet eventsSheet) throws IOException {
-        return eventsSheet.read().stream().filter(WbMapperUtils::canOperate).map(row -> {
-            var num = getNumWithDefault(row, 0).intValue();
-            var title = getRawOrNull(row, 1);
-            var locName = getRawOrNull(row, 2);
-            var date = getLocalDateOrNull(row, 3);
-            var startTime = getLocalTimeOrNull(row, 4);
-            var endTime = getLocalTimeOrNull(row, 5);
-            var zoneId = getZoneIdWithDefault(row, 6);
-            var description = getRawOrNull(row, 7);
-            var managerName = getRawOrNull(row, 8);
-            var paid = getBooleanWithDefault(row, 9);
-            var paymentAmount = getNumWithDefault(row, 10);
-
-            // TODO room with index 11
-
-            var suitableUm = getBooleanWithDefault(row, 12);
-            var boldAm = getBooleanWithDefault(row, 13);
-            var boldUm = getBooleanWithDefault(row, 14);
-            var publish = getBooleanWithDefault(row, 15);
-
-            var weekId = getRawOrNull(row, 15); // TODO
-
-            return new WbEvent(
-                    num, title, locName, date, startTime, endTime, zoneId, description,
-                    managerName, paid, paymentAmount, boldAm, boldUm, suitableUm, publish
-            );
-        }).toList();
     }
 }

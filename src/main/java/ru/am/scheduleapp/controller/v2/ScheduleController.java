@@ -1,11 +1,8 @@
 package ru.am.scheduleapp.controller.v2;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.am.scheduleapp.model.dto.v2.BasicResponse;
 import ru.am.scheduleapp.model.dto.v2.WeekResponseDto;
 import ru.am.scheduleapp.service.v2.ScheduleService;
@@ -18,15 +15,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/v2")
 public class ScheduleController {
 
-    private AtomicReference<LocalDateTime> lastRefreshTime = new AtomicReference<>(LocalDateTime.now());
+    private final AtomicReference<LocalDateTime> lastRefreshTime = new AtomicReference<>(LocalDateTime.now());
 
     private final ScheduleService scheduleService;
 
     @GetMapping("/schedule")
+    @CrossOrigin(origins = "http://schedule.rishathm.ru")
     public ResponseEntity<List<WeekResponseDto>> getSchedule(
             @RequestParam Map<String, String> params
     ) {

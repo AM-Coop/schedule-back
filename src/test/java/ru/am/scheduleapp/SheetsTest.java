@@ -14,6 +14,11 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import org.junit.jupiter.api.Test;
+import ru.am.scheduleapp.model.wb.WbEvent;
+import ru.am.scheduleapp.model.wb.WbEventManager;
+import ru.am.scheduleapp.model.wb.WbLocation;
+import ru.am.scheduleapp.model.wb.WbWeek;
+import ru.am.scheduleapp.utils.SheetsMapperUtils;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -68,27 +73,83 @@ public class SheetsTest {
     @Test
     public void test() throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
+
+        parseEvents();
+        parseWeeks();
+        parseManagers();
+        parseLocation();
+    }
+
+    private void parseEvents() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        final String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"; //TODO change
-        final String range = "Class Data!A2:E";
+        final String spreadsheetId = "1GmByqgnT1DzRKA5l46aVWgYANqpr0HijT5kqHczlDq0"; //TODO change
+        final String range = "event!A2:P";
         Sheets service =
                 new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                         .setApplicationName(APPLICATION_NAME)
                         .build();
-        System.out.println();
 
         ValueRange response = service.spreadsheets().values()
                 .get(spreadsheetId, range)
                 .execute();
         List<List<Object>> values = response.getValues();
-        if (values == null || values.isEmpty()) {
-            System.out.println("No data found.");
-        } else {
-            System.out.println("Name, Major");
-            for (List row : values) {
-                // Print columns A and E, which correspond to indices 0 and 4.
-                System.out.printf("%s, %s\n", row.get(0), row.get(4));
-            }
-        }
+
+        List<WbEvent> wbEvents = SheetsMapperUtils.readEventList(values);
+        System.out.println(wbEvents);
     }
+
+    private void parseWeeks() throws GeneralSecurityException, IOException {
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        final String spreadsheetId = "1GmByqgnT1DzRKA5l46aVWgYANqpr0HijT5kqHczlDq0"; //TODO change
+        final String range = "week!A2:E";
+        Sheets service =
+                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                        .setApplicationName(APPLICATION_NAME)
+                        .build();
+
+        ValueRange response = service.spreadsheets().values()
+                .get(spreadsheetId, range)
+                .execute();
+        List<List<Object>> values = response.getValues();
+
+        List<WbWeek> wbWeeks = SheetsMapperUtils.readWeekList(values);
+        System.out.println(wbWeeks);
+    }
+
+    private void parseManagers() throws GeneralSecurityException, IOException {
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        final String spreadsheetId = "1GmByqgnT1DzRKA5l46aVWgYANqpr0HijT5kqHczlDq0"; //TODO change
+        final String range = "manager!A2:E";
+        Sheets service =
+                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                        .setApplicationName(APPLICATION_NAME)
+                        .build();
+
+        ValueRange response = service.spreadsheets().values()
+                .get(spreadsheetId, range)
+                .execute();
+        List<List<Object>> values = response.getValues();
+
+        List<WbEventManager> wbEventManagers = SheetsMapperUtils.readEventManagerList(values);
+        System.out.println(wbEventManagers);
+    }
+
+    private void parseLocation() throws GeneralSecurityException, IOException {
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        final String spreadsheetId = "1GmByqgnT1DzRKA5l46aVWgYANqpr0HijT5kqHczlDq0"; //TODO change
+        final String range = "location!A2:H";
+        Sheets service =
+                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                        .setApplicationName(APPLICATION_NAME)
+                        .build();
+
+        ValueRange response = service.spreadsheets().values()
+                .get(spreadsheetId, range)
+                .execute();
+        List<List<Object>> values = response.getValues();
+
+        List<WbLocation> wbLocations = SheetsMapperUtils.readLocationList(values);
+        System.out.println(wbLocations);
+    }
+
 }

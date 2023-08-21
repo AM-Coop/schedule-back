@@ -155,12 +155,16 @@ public class SheetsMapperUtils {
     }
 
     public static ZoneId getZoneIdWithDefault(List<Object> row, int i) {
-        var plus = "+";
-        var zoneStr = row.get(i).toString();
-        if (zoneStr == null) return ZoneId.of(MSC_ZONE_STR);
-        if (zoneStr.contains(plus)) {
-            var zone = plus + zoneStr.split(plus)[1];
-            return ZoneId.of(zone);
+        try {
+            var plus = "+";
+            var zoneStr = row.get(i).toString();
+            if (zoneStr == null) return ZoneId.of(MSC_ZONE_STR);
+            if (zoneStr.contains(plus)) {
+                var zone = plus + zoneStr.split(plus)[1];
+                return ZoneId.of(zone);
+            }
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
         return ZoneId.of(MSC_ZONE_STR);
     }

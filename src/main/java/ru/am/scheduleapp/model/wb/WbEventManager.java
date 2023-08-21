@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class WbEventManager {
+public class WbEventManager implements WbObj {
 
     private Integer id;
     private String name;

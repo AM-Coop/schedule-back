@@ -8,6 +8,8 @@ import ru.am.scheduleapp.repository.v2.EventRepository;
 import ru.am.scheduleapp.repository.v2.WeekRepository;
 import ru.am.scheduleapp.utils.DtoMapperUtils;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,7 @@ public class ScheduleService {
 
     private final EventRepository eventRepository;
     private final WeekRepository weekRepository;
+    private final SheetsService sheetsService;
 
     @Transactional
     public List<WeekResponseDto> getSchedule(Map<String, String> params) {
@@ -35,8 +38,10 @@ public class ScheduleService {
         return res;
     }
 
-    public void refreshFromGoogleSheets() {
+    public void refreshFromGoogleSheets() throws GeneralSecurityException, IOException {
 
-        // TODO
+        sheetsService.refreshFromGoogleSheets();
+
+
     }
 }

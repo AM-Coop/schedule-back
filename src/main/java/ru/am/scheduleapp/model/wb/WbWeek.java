@@ -8,7 +8,7 @@ import java.time.LocalDate;
 //@Document
 @AllArgsConstructor
 @Data
-public class WbWeek {
+public class WbWeek implements WbObj {
 
 
     private Integer num;

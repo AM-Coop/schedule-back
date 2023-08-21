@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class WbLocation {
+public class WbLocation implements WbObj {
 
     private Integer num;
     private String name;

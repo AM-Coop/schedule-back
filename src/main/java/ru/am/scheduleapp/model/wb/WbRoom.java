@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class WbRoom {
+public class WbRoom implements WbObj {
 
     private Integer num;
     private String title;

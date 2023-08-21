@@ -11,7 +11,7 @@ import java.time.ZoneId;
 //@Document
 @AllArgsConstructor
 @Data
-public class WbEvent {
+public class WbEvent implements WbObj {
 
 
     private Integer num;

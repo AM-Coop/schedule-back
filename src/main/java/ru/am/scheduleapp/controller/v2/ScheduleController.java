@@ -7,6 +7,8 @@ import ru.am.scheduleapp.model.dto.v2.BasicResponse;
 import ru.am.scheduleapp.model.dto.v2.WeekResponseDto;
 import ru.am.scheduleapp.service.v2.ScheduleService;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<BasicResponse> refresh() {
+    public ResponseEntity<BasicResponse> refresh() throws GeneralSecurityException, IOException {
         if (lastRefreshTime.get().plusMinutes(1).isAfter(LocalDateTime.now()))
             return ResponseEntity.status(NOT_ACCEPTABLE).body(new BasicResponse("to early"));
         else {

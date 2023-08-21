@@ -45,9 +45,21 @@ public class GoogleSheetsService {
     }
 
     public <T extends WbObj> List<T> getSheet(String sheetName, Class<T> type) throws GeneralSecurityException, IOException {
+        String to;
+
+        if (type.isAssignableFrom(WbWeek.class)) {
+            to = "E";
+        } else if (type.isAssignableFrom(WbEvent.class)) {
+            to = "P";
+        } else if (type.isAssignableFrom(WbEventManager.class)) {
+            to = "E";
+        } else if (type.isAssignableFrom(WbLocation.class)) {
+            to = "H";
+        } else throw new RuntimeException("no mapper for " + type.getName());
+
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         final String spreadsheetId = "1GmByqgnT1DzRKA5l46aVWgYANqpr0HijT5kqHczlDq0"; //TODO change
-        final String range = sheetName + "!A2:E";
+        final String range = sheetName + "!A2:" + to;
         Sheets service =
                 new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                         .setApplicationName(APPLICATION_NAME)

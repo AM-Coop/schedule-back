@@ -8,12 +8,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
 public class SheetsMapperUtils {
 
     private static final String MSC_ZONE_STR = "+3";
+
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
 
     public static List<WbWeek> readWeekList(List<List<Object>> values) throws IOException {
@@ -111,7 +114,10 @@ public class SheetsMapperUtils {
 
     private static LocalTime getLocalTimeOrNull(List<Object> row, int i) {
         try {
-            return LocalTime.parse(row.get(i).toString());
+            String time = row.get(i).toString();
+            String hour = time.split(":")[0];
+            if (hour.length() == 1) time = "0" + time;
+            return LocalTime.parse(time);
         } catch (Exception e) {
             log.warn(e.getMessage());
             return null;
@@ -120,7 +126,7 @@ public class SheetsMapperUtils {
 
     private static LocalDate getLocalDateOrNull(List<Object> row, int i) {
         try {
-            return LocalDate.parse(row.get(i).toString());
+            return LocalDate.parse(row.get(i).toString(), dateTimeFormatter);
         } catch (Exception e) {
             log.warn(e.getMessage());
             return null;
@@ -129,7 +135,10 @@ public class SheetsMapperUtils {
 
     private static LocalDate extractEventDate(List<Object> row, int i) {
         try {
-            return LocalDate.parse(row.get(i).toString().split(" ")[1]);
+            return LocalDate.parse(
+                    row.get(i).toString().split(" ")[1],
+                    dateTimeFormatter
+            );
         } catch (Exception e) {
             log.warn(e.getMessage());
             return null;

@@ -48,11 +48,11 @@ public class GoogleSheetsService {
         String to;
 
         if (type.isAssignableFrom(WbWeek.class)) {
-            to = "E";
+            to = "F";
         } else if (type.isAssignableFrom(WbEvent.class)) {
             to = "P";
         } else if (type.isAssignableFrom(WbEventManager.class)) {
-            to = "E";
+            to = "F";
         } else if (type.isAssignableFrom(WbLocation.class)) {
             to = "H";
         } else throw new RuntimeException("no mapper for " + type.getName());

@@ -22,6 +22,7 @@ public class DtoMapperUtils {
                 week.getNotes(),
                 week.getDateFrom(),
                 week.getDateTo(),
+                week.getQuoteForUm(),
                 mapEvents(week.getEventList())
         );
     }
@@ -50,7 +51,7 @@ public class DtoMapperUtils {
     private static ManagerResponseDto mapManager(Manager manager) {
         if (manager == null) return null;
         return new ManagerResponseDto(
-                manager.getId(), manager.getNum(), manager.getName(), manager.getPhoto(), manager.getDescription(), manager.getContact()
+                manager.getId(), manager.getNum(), manager.getName(), manager.getPhoto(), manager.getDescription(), manager.getContact(), manager.getWorldlyName()
         );
     }
 

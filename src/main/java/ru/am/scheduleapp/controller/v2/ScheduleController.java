@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 @RequestMapping("/v2")
 public class ScheduleController {
 
-    private final AtomicReference<LocalDateTime> lastRefreshTime = new AtomicReference<>(LocalDateTime.now());
+    private final AtomicReference<LocalDateTime> lastRefreshTime = new AtomicReference<>(LocalDateTime.now().minusSeconds(50));
 
     private final ScheduleService scheduleService;
 

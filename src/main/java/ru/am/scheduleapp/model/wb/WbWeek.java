@@ -20,5 +20,7 @@ public class WbWeek implements WbObj {
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
+    private String quoteForUm;
+
 
 }

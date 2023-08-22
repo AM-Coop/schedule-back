@@ -33,6 +33,10 @@ public class Week {
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
+    @Column(length = 10000)
+    private String quoteForUm;
+
+
     @OneToMany(mappedBy = "week", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Event> eventList = List.of();
 }

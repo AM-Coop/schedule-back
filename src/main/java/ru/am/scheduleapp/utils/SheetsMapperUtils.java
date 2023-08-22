@@ -26,8 +26,9 @@ public class SheetsMapperUtils {
             var notes = getRawOrNull(row, 2);
             var dateFrom = getLocalDateOrNull(row, 3);
             var dateTo = getLocalDateOrNull(row, 4);
+            var quoteForUm = getRawOrNull(row, 5);
             return new WbWeek(
-                    num.intValue(), quote, notes, dateFrom, dateTo
+                    num.intValue(), quote, notes, dateFrom, dateTo, quoteForUm
             );
         }).filter(row -> row.getNum() != -1).toList();
     }
@@ -39,8 +40,9 @@ public class SheetsMapperUtils {
             var photo = getRawOrNull(row, 2);
             var description = getRawOrNull(row, 3);
             var contact = getRawOrNull(row, 4);
+            var worldlyName = getRawOrNull(row, 5);
             return new WbEventManager(
-                    id, name, photo, description, contact
+                    id, name, photo, description, contact, worldlyName
             );
         }).filter(row -> row.getId() != -1).toList();
     }
@@ -49,13 +51,14 @@ public class SheetsMapperUtils {
         return values.stream().filter(SheetsMapperUtils::canOperate).map(row -> {
             var id = new BigDecimal(row.get(0).toString());
             var name = getRawOrNull(row, 1);
-            var timeZone = getRawOrNull(row, 2);
-            var address = getRawOrNull(row, 3);
-            var rout = getRawOrNull(row, 4);
-            var icon = getRawOrNull(row, 5);
-            var description = getRawOrNull(row, 6);
+            var region = getRawOrNull(row, 2);
+            var timeZone = getRawOrNull(row, 3);
+            var address = getRawOrNull(row, 4);
+            var rout = getRawOrNull(row, 5);
+            var icon = getRawOrNull(row, 6);
+            var description = getRawOrNull(row, 7);
             return new WbLocation(
-                    id.intValue(), name, timeZone, address, rout, "region todo", icon, description
+                    id.intValue(), name, timeZone, address, rout, region, icon, description
             );
         }).filter(row -> row.getNum() != -1).toList();
     }

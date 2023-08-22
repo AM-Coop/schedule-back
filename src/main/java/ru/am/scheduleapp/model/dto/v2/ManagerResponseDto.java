@@ -16,4 +16,7 @@ public class ManagerResponseDto {
     private String photo;
     private String description;
     private String contact;
+
+    private String worldlyName;
+
 }

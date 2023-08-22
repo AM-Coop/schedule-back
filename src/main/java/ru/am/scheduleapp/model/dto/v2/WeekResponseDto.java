@@ -24,5 +24,8 @@ public class WeekResponseDto {
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
+    private String quoteForUm;
+
+
     private List<EventResponseDto> eventList;
 }

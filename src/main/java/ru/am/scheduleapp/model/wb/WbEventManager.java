@@ -13,4 +13,6 @@ public class WbEventManager implements WbObj {
     private String description;
     private String contact;
 
+    private String worldlyName;
+
 }

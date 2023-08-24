@@ -13,7 +13,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
-import jakarta.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.am.scheduleapp.model.wb.*;
 import ru.am.scheduleapp.utils.SheetsMapperUtils;
@@ -24,11 +24,14 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@NoArgsConstructor
 public class GoogleSheetsService {
 
     private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
     private static final JsonFactory JSON_FACTORY = new JacksonFactory();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
+
+//    private Credential credential;
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -38,30 +41,36 @@ public class GoogleSheetsService {
             Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
     private static final String CREDENTIALS_FILE_PATH = "/etc/am/google/creds.json";
 
+//    private NetHttpTransport transport;
 
-    @PostConstruct
-    public void init() {
-//        credential = getCredentials()
-    }
+//    @PostConstruct
+//    public void init() throws GeneralSecurityException, IOException {
+//        transport =
+//    }
+
+
+//    public GoogleSheetsService(NetHttpTransport transport) {
+//        this.transport = transport;
+//    }
 
     public <T extends WbObj> List<T> getSheet(String sheetName, Class<T> type) throws GeneralSecurityException, IOException {
         String to;
 
         if (type.isAssignableFrom(WbWeek.class)) {
-            to = "F";
+            to = "G";
         } else if (type.isAssignableFrom(WbEvent.class)) {
-            to = "P";
+            to = "Q";
         } else if (type.isAssignableFrom(WbEventManager.class)) {
             to = "F";
         } else if (type.isAssignableFrom(WbLocation.class)) {
             to = "H";
         } else throw new RuntimeException("no mapper for " + type.getName());
 
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        final var transport = GoogleNetHttpTransport.newTrustedTransport();
         final String spreadsheetId = "1GmByqgnT1DzRKA5l46aVWgYANqpr0HijT5kqHczlDq0"; //TODO change
         final String range = sheetName + "!A2:" + to;
         Sheets service =
-                new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                new Sheets.Builder(transport, JSON_FACTORY, getCredentials(transport))
                         .setApplicationName(APPLICATION_NAME)
                         .build();
 
@@ -81,7 +90,7 @@ public class GoogleSheetsService {
         } else throw new RuntimeException("no mapper for " + type.getName());
     }
 
-    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
+    public static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         // Load client secrets.
 

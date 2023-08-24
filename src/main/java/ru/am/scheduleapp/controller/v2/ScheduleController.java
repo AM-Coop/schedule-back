@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 @RequestMapping("/v2")
 public class ScheduleController {
 
-    private final AtomicReference<LocalDateTime> lastRefreshTime = new AtomicReference<>(LocalDateTime.now());
+    private final AtomicReference<LocalDateTime> lastRefreshTime = new AtomicReference<>(LocalDateTime.now().minusSeconds(55));
 
     private final ScheduleService scheduleService;
 
@@ -39,7 +39,7 @@ public class ScheduleController {
         if (lastRefreshTime.get().plusMinutes(1).isAfter(LocalDateTime.now()))
             return ResponseEntity.status(NOT_ACCEPTABLE).body(new BasicResponse("to early"));
         else {
-            scheduleService.refreshFromGoogleSheets();
+            scheduleService.refreshFromGoogleSheets(true);
             lastRefreshTime.set(LocalDateTime.now());
             return ResponseEntity.ok(new BasicResponse("ok"));
         }

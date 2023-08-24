@@ -44,6 +44,8 @@ public class Event {
     private boolean boldAm;
     private boolean boldUm;
     private boolean suitableUm;
+
+    private boolean suitableAm;
     private boolean publish;
 
     @ManyToOne(cascade = CascadeType.ALL)

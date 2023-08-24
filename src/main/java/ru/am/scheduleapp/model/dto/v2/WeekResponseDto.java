@@ -20,11 +20,12 @@ public class WeekResponseDto {
     private String quote;
 
 
-    private String notes;
+    private String note1;
+    private String note2;
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
-    private String quoteForUm;
+    private String community;
 
 
     private List<EventResponseDto> eventList;

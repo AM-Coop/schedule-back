@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface WeekRepository extends CrudRepository<Week, String> {
 
-    public Optional<Week> findWeekByDateFromAndDateTo(LocalDate dateFrom, LocalDate dateTo);
+    public Optional<Week> findWeekByDateFromAndDateToAndCommunity(LocalDate dateFrom, LocalDate dateTo, String community);
 
 
     @Query(value = "select * from week w where w.date_from <= ?1 and w.date_to >= ?1", nativeQuery = true)

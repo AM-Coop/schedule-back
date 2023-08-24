@@ -29,12 +29,14 @@ public class Week {
     private String quote;
 
     @Column(length = 10000)
-    private String notes;
+    private String note1;
+    @Column(length = 10000)
+    private String note2;
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
-    @Column(length = 10000)
-    private String quoteForUm;
+    //    @Column(length = 10000)
+    private String community;
 
 
     @OneToMany(mappedBy = "week", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

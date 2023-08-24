@@ -16,11 +16,13 @@ public class WbWeek implements WbObj {
 
     private String quote;
 
-    private String notes;
+    private String note1;
+    private String note2;
+
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
-    private String quoteForUm;
+    private String community;
 
 
 }

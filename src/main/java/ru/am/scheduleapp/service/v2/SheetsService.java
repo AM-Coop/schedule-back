@@ -92,6 +92,7 @@ public class SheetsService {
             entity.setSuitableUm(event.isSuitableUm());
             entity.setTitle(event.getTitle());
             entity.setBoldUm(event.isBoldUm());
+            entity.setSuitableAm(event.isSuitableAm());
 
 //            managerRepository.findByName(ev)
             if (entity.getManager() == null) {
@@ -116,15 +117,17 @@ public class SheetsService {
     @Transactional
     public void updateWeeksFromWb(List<WbWeek> weeks) {
         weeks.forEach(week -> {
-            Week entity = weekRepository.findWeekByDateFromAndDateTo(week.getDateFrom(), week.getDateTo()).orElseGet(() -> {
+            Week entity = weekRepository.findWeekByDateFromAndDateToAndCommunity(week.getDateFrom(), week.getDateTo(), week.getCommunity()).orElseGet(() -> {
                 log.info("new week {}", week);
                 return new Week();
             });
-            entity.setNotes(week.getNotes());
+            entity.setNum(week.getNum());
+            entity.setNote1(week.getNote1());
+            entity.setNote2(week.getNote2());
             entity.setQuote(week.getQuote());
             entity.setDateFrom(week.getDateFrom());
             entity.setDateTo(week.getDateTo());
-            entity.setQuoteForUm(week.getQuoteForUm());
+            entity.setCommunity(week.getCommunity());
             weekRepository.save(entity);
 
 //            List<Event> events = eventRepository.findAllByDateBetween(week.getDateFrom(), week.getDateTo());
@@ -133,7 +136,8 @@ public class SheetsService {
         });
     }
 
-    public void refreshFromGoogleSheets() throws GeneralSecurityException, IOException {
+    public void refreshFromGoogleSheets(boolean refreshEntities) throws GeneralSecurityException, IOException {
+        log.info("refreshFromGoogleSheets");
         List<WbEvent> event = googleSheetsService.getSheet("event", WbEvent.class);
 
         List<WbEventManager> managers = googleSheetsService.getSheet("manager", WbEventManager.class);
@@ -143,10 +147,14 @@ public class SheetsService {
         List<WbWeek> weeks = googleSheetsService.getSheet("week", WbWeek.class);
 
 //        updateRooms(WbMapperUtils.readRoomList(wb)); // TODO
-        updateLocations(locations);
-        updateManagers(managers);
-        updateWeeksFromWb(weeks);
-        updateEvents(event);
+        if (refreshEntities) {
+            log.info("refreshEntities");
+            updateLocations(locations);
+            updateManagers(managers);
+            updateWeeksFromWb(weeks);
+            updateEvents(event);
+        }
+
     }
 
 

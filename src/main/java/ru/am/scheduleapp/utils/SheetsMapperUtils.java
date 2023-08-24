@@ -23,12 +23,15 @@ public class SheetsMapperUtils {
         return values.stream().filter(SheetsMapperUtils::canOperate).map(row -> {
             var num = getNumWithDefault(row, 0);
             var quote = getRawOrNull(row, 1);
-            var notes = getRawOrNull(row, 2);
-            var dateFrom = getLocalDateOrNull(row, 3);
-            var dateTo = getLocalDateOrNull(row, 4);
-            var quoteForUm = getRawOrNull(row, 5);
+            var note1 = getRawOrNull(row, 2);
+            var note2 = getRawOrNull(row, 3);
+
+            var dateFrom = getLocalDateOrNull(row, 4);
+            var dateTo = getLocalDateOrNull(row, 5);
+            var community = getRawOrNull(row, 6);
+
             return new WbWeek(
-                    num.intValue(), quote, notes, dateFrom, dateTo, quoteForUm
+                    num.intValue(), quote, note1, note2, dateFrom, dateTo, community
             );
         }).filter(row -> row.getNum() != -1).toList();
     }
@@ -92,16 +95,18 @@ public class SheetsMapperUtils {
 
             // TODO room with index 11
 
-            var suitableUm = getBooleanWithDefault(row, 12);
+            var suitableAm = getBooleanWithDefault(row, 12);
             var boldAm = getBooleanWithDefault(row, 13);
-            var boldUm = getBooleanWithDefault(row, 14);
-            var publish = getBooleanWithDefault(row, 15);
 
-            var weekId = getRawOrNull(row, 15); // TODO
+            var suitableUm = getBooleanWithDefault(row, 14);
+            var boldUm = getBooleanWithDefault(row, 15);
+            var publish = getBooleanWithDefault(row, 16);
+
+//            var weekId = getRawOrNull(row, 17); // TODO
 
             return new WbEvent(
                     num, title, locName, date, startTime, endTime, zoneId, description,
-                    managerName, paid, paymentAmount, boldAm, boldUm, suitableUm, publish
+                    managerName, paid, paymentAmount, suitableAm, boldAm, suitableUm, boldUm, publish
             );
         }).filter(row -> row.getNum() != -1).toList();
     }

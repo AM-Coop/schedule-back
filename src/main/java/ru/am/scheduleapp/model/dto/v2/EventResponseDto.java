@@ -32,9 +32,15 @@ public class EventResponseDto {
     private ManagerResponseDto manager;
     private boolean paid;
     private BigDecimal paymentAmount;
+
+    private boolean suitableAm;
+
     private boolean boldAm;
-    private boolean boldUm;
+
     private boolean suitableUm;
+
+    private boolean boldUm;
+
     private boolean publish;
 
 

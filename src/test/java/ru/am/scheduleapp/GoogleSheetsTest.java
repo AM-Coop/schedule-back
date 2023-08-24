@@ -1,5 +1,7 @@
 package ru.am.scheduleapp;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.am.scheduleapp.model.wb.WbEvent;
 import ru.am.scheduleapp.model.wb.WbEventManager;
@@ -12,7 +14,15 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class GoogleSheetsTest {
-    private final GoogleSheetsService service = new GoogleSheetsService();
+    private static GoogleSheetsService service;
+
+    @BeforeAll
+    public static void init() throws IOException, GeneralSecurityException {
+        var transport = GoogleNetHttpTransport.newTrustedTransport();
+        service = new GoogleSheetsService(
+
+        );
+    }
 
     @Test
     public void test() throws GeneralSecurityException, IOException {

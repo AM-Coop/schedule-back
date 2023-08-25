@@ -23,22 +23,12 @@ public class Week {
 
     //    @Indexed(unique = true)
     private Integer num;
-
-    @Column(length = 10000)
-
-    private String quote;
-
-    @Column(length = 10000)
-    private String note1;
-    @Column(length = 10000)
-    private String note2;
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
-    //    @Column(length = 10000)
-    private String community;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "week")
+    private List<WeekInfo> weekInfos = List.of();
 
-
-    @OneToMany(mappedBy = "week", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "week")
     private List<Event> eventList = List.of();
 }

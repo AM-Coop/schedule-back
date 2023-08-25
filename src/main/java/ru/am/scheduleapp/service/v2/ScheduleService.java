@@ -72,7 +72,7 @@ public class ScheduleService {
 
         current = weeks.stream().filter(elem -> {
             var start = LocalDate.now().plusDays(daysOffset);
-            return elem.getCommunity().equals(community) && (elem.getDateFrom().isBefore(start) || elem.getDateFrom().isEqual(start)) &&
+            return (elem.getDateFrom().isBefore(start) || elem.getDateFrom().isEqual(start)) &&
                     (elem.getDateTo().isAfter(start) || elem.getDateTo().isEqual(start));
         }).findFirst().orElse(current);
 

@@ -4,29 +4,32 @@ import ru.am.scheduleapp.model.dto.v2.EventResponseDto;
 import ru.am.scheduleapp.model.dto.v2.LocationResponseDto;
 import ru.am.scheduleapp.model.dto.v2.ManagerResponseDto;
 import ru.am.scheduleapp.model.dto.v2.WeekResponseDto;
-import ru.am.scheduleapp.model.entity.v2.Event;
-import ru.am.scheduleapp.model.entity.v2.Location;
-import ru.am.scheduleapp.model.entity.v2.Manager;
-import ru.am.scheduleapp.model.entity.v2.Week;
+import ru.am.scheduleapp.model.entity.v2.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DtoMapperUtils {
 
     public static WeekResponseDto mapFromWeekEntity(Week week, boolean showAm, boolean showUm) {
+        WeekInfo weekInfo = week.getWeekInfos().stream().filter(info -> {
+            if (showAm) return Objects.equals(info.getCommunity(), "AM");
+            else return Objects.equals(info.getCommunity(), "UM");
+        }).findFirst().get();
         return new WeekResponseDto(
                 week.getId(),
                 week.getNum(),
-                week.getQuote(),
-                week.getNote1(),
-                week.getNote2(),
                 week.getDateFrom(),
                 week.getDateTo(),
-                week.getCommunity(),
+                weekInfo.getQuote(),
+                weekInfo.getNote1(),
+                weekInfo.getNote2(),
+                weekInfo.getCommunity(),
                 mapEvents(week.getEventList(), showAm, showUm)
         );
     }
+
 
     private static List<EventResponseDto> mapEvents(List<Event> eventList, boolean showAm, boolean showUm) {
         return eventList.stream()

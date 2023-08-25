@@ -4,22 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.am.scheduleapp.model.entity.v2.Event;
-import ru.am.scheduleapp.model.entity.v2.Location;
-import ru.am.scheduleapp.model.entity.v2.Manager;
-import ru.am.scheduleapp.model.entity.v2.Week;
+import ru.am.scheduleapp.model.entity.v2.*;
 import ru.am.scheduleapp.model.wb.WbEvent;
 import ru.am.scheduleapp.model.wb.WbEventManager;
 import ru.am.scheduleapp.model.wb.WbLocation;
 import ru.am.scheduleapp.model.wb.WbWeek;
-import ru.am.scheduleapp.repository.v2.EventRepository;
-import ru.am.scheduleapp.repository.v2.LocationRepository;
-import ru.am.scheduleapp.repository.v2.ManagerRepository;
-import ru.am.scheduleapp.repository.v2.WeekRepository;
+import ru.am.scheduleapp.repository.v2.*;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +22,8 @@ import java.util.List;
 public class SheetsService {
     private final EventRepository eventRepository;
     private final WeekRepository weekRepository;
+
+    private final WeekInfoRepository weekInfoRepository;
 
     private final LocationRepository locationRepository;
 
@@ -95,17 +92,18 @@ public class SheetsService {
             entity.setSuitableAm(event.isSuitableAm());
 
 //            managerRepository.findByName(ev)
-            if (entity.getManager() == null) {
-                managerRepository.findByName(event.getManagerName()).ifPresent(entity::setManager);
-            }
+//            if (entity.getManager() == null) {
+            managerRepository.findByName(event.getManagerName()).ifPresent(entity::setManager);
+//            }
 
-            if (entity.getLocation() == null) {
-                locationRepository.findByName(event.getLocationName()).ifPresent(entity::setLocation);
-            }
+//            if (entity.getLocation() == null) {
+            locationRepository.findByName(event.getLocationName()).ifPresent(entity::setLocation);
+//            }
 
-            if (entity.getWeek() == null) {
-                weekRepository.findByEventDate(event.getDate()).ifPresent(entity::setWeek);
-            }
+//            if (entity.getWeeks() == null ||) {
+            Week byEventDate = weekRepository.findByEventDate(event.getDate()).get();
+            entity.setWeek(byEventDate);
+//            }
 
 
             eventRepository.save(entity);
@@ -117,22 +115,54 @@ public class SheetsService {
     @Transactional
     public void updateWeeksFromWb(List<WbWeek> weeks) {
         weeks.forEach(week -> {
-            Week entity = weekRepository.findWeekByDateFromAndDateToAndCommunity(week.getDateFrom(), week.getDateTo(), week.getCommunity()).orElseGet(() -> {
+            Week entity = weekRepository.findWeekByDateFromAndDateTo(week.getDateFrom(), week.getDateTo()).orElseGet(() -> {
                 log.info("new week {}", week);
                 return new Week();
             });
             entity.setNum(week.getNum());
-            entity.setNote1(week.getNote1());
-            entity.setNote2(week.getNote2());
-            entity.setQuote(week.getQuote());
             entity.setDateFrom(week.getDateFrom());
             entity.setDateTo(week.getDateTo());
-            entity.setCommunity(week.getCommunity());
+
             weekRepository.save(entity);
 
-//            List<Event> events = eventRepository.findAllByDateBetween(week.getDateFrom(), week.getDateTo());
-//            week.getEventList().clear();
-//            week.getEventList().addAll(events);
+        });
+    }
+
+    @Transactional
+    public void updateWeekInfosFromWb(List<WbWeek> weeks) {
+        weeks.forEach(week -> {
+            Week entity = weekRepository.findWeekByDateFromAndDateTo(week.getDateFrom(), week.getDateTo()).get();
+            WeekInfo weekInfo;
+            if (entity.getWeekInfos().isEmpty()) {
+                weekInfo = new WeekInfo();
+                weekInfo.setCommunity(week.getCommunity());
+                weekInfo.setNote1(week.getNote1());
+                weekInfo.setNote2(week.getNote2());
+                weekInfo.setQuote(week.getQuote());
+
+
+            } else {
+                weekInfo = entity.getWeekInfos().stream()
+                        .filter(info -> Objects.equals(info.getCommunity(), week.getCommunity())).findFirst().orElse(null);
+                if (weekInfo != null) {
+                    weekInfo.setNote1(week.getNote1());
+                    weekInfo.setNote2(week.getNote2());
+                    weekInfo.setQuote(week.getQuote());
+                    weekInfo.setCommunity(week.getCommunity());
+
+                } else {
+                    weekInfo = new WeekInfo();
+                    weekInfo.setCommunity(week.getCommunity());
+                    weekInfo.setNote1(week.getNote1());
+                    weekInfo.setNote2(week.getNote2());
+                    weekInfo.setQuote(week.getQuote());
+                    weekInfo.setWeek(entity);
+
+                }
+            }
+            weekInfo.setWeek(entity);
+            weekInfoRepository.save(weekInfo);
+
         });
     }
 
@@ -153,6 +183,7 @@ public class SheetsService {
             updateManagers(managers);
             updateWeeksFromWb(weeks);
             updateEvents(event);
+            updateWeekInfosFromWb(weeks);
         }
 
     }

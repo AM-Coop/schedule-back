@@ -17,16 +17,19 @@ public class WeekResponseDto {
     private Integer num;
 
 
+    private LocalDate dateFrom;
+    private LocalDate dateTo;
+
+
     private String quote;
 
 
     private String note1;
     private String note2;
-    private LocalDate dateFrom;
-    private LocalDate dateTo;
+
 
     private String community;
 
-
     private List<EventResponseDto> eventList;
+
 }

@@ -17,6 +17,7 @@ ru:
     scheduleapp:
       use-date-filter: false
       wb-dir-location: '/tmp/wb/'
+      google-creds-file-path: '/etc/am/google/creds-service.json' # '/etc/am/google/creds.json'
 
 server:
   port: 8087

@@ -22,6 +22,7 @@ public class GoogleSheetsTest {
         service = new GoogleSheetsService(
 
         );
+        service.credsPath = "/etc/am/google/creds-service.json";
     }
 
     @Test

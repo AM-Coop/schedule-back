@@ -26,7 +26,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @GetMapping("/schedule")
-    @CrossOrigin(origins = "http://schedule.rishathm.ru")
+    @CrossOrigin
     public ResponseEntity<List<WeekResponseDto>> getSchedule(
             @RequestParam Map<String, String> params
     ) {

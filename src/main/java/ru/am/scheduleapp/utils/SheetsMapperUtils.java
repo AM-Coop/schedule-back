@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class SheetsMapperUtils {
@@ -51,6 +52,7 @@ public class SheetsMapperUtils {
     }
 
     public static List<WbLocation> readLocationList(List<List<Object>> values) throws IOException {
+        var counter = new AtomicInteger(1);
         return values.stream().filter(SheetsMapperUtils::canOperate).map(row -> {
             var id = new BigDecimal(row.get(0).toString());
             var name = getRawOrNull(row, 1);
@@ -61,7 +63,7 @@ public class SheetsMapperUtils {
             var icon = getRawOrNull(row, 6);
             var description = getRawOrNull(row, 7);
             return new WbLocation(
-                    id.intValue(), name, timeZone, address, rout, region, icon, description
+                    id.intValue(), name, timeZone, address, rout, region, icon, description, counter.getAndIncrement()
             );
         }).filter(row -> row.getNum() != -1).toList();
     }

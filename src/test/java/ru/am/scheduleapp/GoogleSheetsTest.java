@@ -1,6 +1,5 @@
 package ru.am.scheduleapp;
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.am.scheduleapp.model.wb.WbEvent;
@@ -18,10 +17,7 @@ public class GoogleSheetsTest {
 
     @BeforeAll
     public static void init() throws IOException, GeneralSecurityException {
-        var transport = GoogleNetHttpTransport.newTrustedTransport();
-        service = new GoogleSheetsService(
-
-        );
+        service = new GoogleSheetsService();
         service.credsPath = "/etc/am/google/creds-service.json";
     }
 

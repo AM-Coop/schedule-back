@@ -65,6 +65,7 @@ public class SheetsService {
             entity.setAddress(location.getAddress());
             entity.setTimeZone(location.getTimeZone());
             entity.setDescription(location.getDescription());
+            entity.setDisplayOrder(location.getOrder());
             locationRepository.save(entity);
         });
     }

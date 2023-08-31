@@ -40,25 +40,29 @@ public class DtoMapperUtils {
                     else if (showAm) return elem.isSuitableAm();
                     else return elem.isSuitableUm();
                 })
-                .map(e -> new EventResponseDto(
-                        e.getId(),
-                        e.getNum(),
-                        e.getTitle(),
-                        mapLocation(e.getLocation()),
-                        e.getDate(),
-                        e.getStartTime(),
-                        e.getEndTime(),
-                        e.getTimeZone(),
-                        e.getDescription(),
-                        mapManager(e.getManager()),
-                        e.isPaid(),
-                        e.getPaymentAmount(),
-                        e.isSuitableAm(),
-                        e.isBoldAm(),
-                        e.isSuitableUm(),
-                        e.isBoldUm(),
-                        e.isPublish()
-                )).collect(Collectors.toList());
+                .map(e -> {
+                    var isBold = false;
+                    if (showAm) isBold = e.isBoldAm();
+                    else if (showUm) isBold = e.isBoldUm();
+                    return new EventResponseDto(
+                            e.getId(),
+                            e.getNum(),
+                            e.getTitle(),
+                            mapLocation(e.getLocation()),
+                            e.getDate(),
+                            e.getStartTime(),
+                            e.getEndTime(),
+                            e.getTimeZone(),
+                            e.getDescription(),
+                            mapManager(e.getManager()),
+                            e.isPaid(),
+                            e.getPaymentAmount(),
+                            e.isSuitableAm(),
+                            isBold,
+                            e.isSuitableUm(),
+                            e.isPublish()
+                    );
+                }).collect(Collectors.toList());
     }
 
     private static ManagerResponseDto mapManager(Manager manager) {
@@ -79,7 +83,8 @@ public class DtoMapperUtils {
                 location.getAddress(),
                 location.getRout(),
                 location.getIcon(),
-                location.getDescription()
+                location.getDescription(),
+                location.getDisplayOrder()
         );
     }
 }

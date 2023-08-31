@@ -35,11 +35,10 @@ public class EventResponseDto {
 
     private boolean suitableAm;
 
-    private boolean boldAm;
+    private boolean bold;
 
     private boolean suitableUm;
 
-    private boolean boldUm;
 
     private boolean publish;
 

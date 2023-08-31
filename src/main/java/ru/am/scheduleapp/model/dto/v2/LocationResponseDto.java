@@ -22,4 +22,7 @@ public class LocationResponseDto {
     private String rout;
     private String icon;
     private String description;
+
+    private Integer order;
+
 }

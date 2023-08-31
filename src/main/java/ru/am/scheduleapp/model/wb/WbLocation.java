@@ -16,4 +16,7 @@ public class WbLocation implements WbObj {
     private String region;
     private String icon;
     private String description;
+
+    private Integer order;
+
 }

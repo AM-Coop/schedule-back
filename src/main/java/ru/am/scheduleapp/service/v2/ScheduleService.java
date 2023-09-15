@@ -13,7 +13,7 @@ import ru.am.scheduleapp.utils.DtoMapperUtils;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,9 +74,12 @@ public class ScheduleService {
         }
 
         current = weeks.stream().filter(elem -> {
-            var start = LocalDate.now().plusDays(daysOffset);
-            return (elem.getDateFrom().isBefore(start) || elem.getDateFrom().isEqual(start)) &&
-                    (elem.getDateTo().isAfter(start) || elem.getDateTo().isEqual(start));
+
+            var start = LocalDateTime.now()
+                    .plusDays(daysOffset)
+                    .plusHours(4); // Чтобы в вс после 20:00 уже показывать след неделю
+            return (elem.getDateFrom().isBefore(start.toLocalDate()) || elem.getDateFrom().isEqual(start.toLocalDate())) &&
+                    (elem.getDateTo().isAfter(start.toLocalDate()) || elem.getDateTo().isEqual(start.toLocalDate()));
         }).findFirst().orElse(current);
 
         return current != null ? List.of(DtoMapperUtils.mapFromWeekEntity(current, showAm, showUm)) : List.of();

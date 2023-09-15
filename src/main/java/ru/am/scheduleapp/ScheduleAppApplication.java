@@ -2,9 +2,11 @@ package ru.am.scheduleapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
 //@EnableConfigurationProperties(RsaProperties.class)
+@EnableCaching
 public class ScheduleAppApplication {
 
 //    @Value("${http.port}")

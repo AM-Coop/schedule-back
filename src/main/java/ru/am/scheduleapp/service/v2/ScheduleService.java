@@ -2,6 +2,8 @@ package ru.am.scheduleapp.service.v2;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.am.scheduleapp.model.dto.v2.WeekResponseDto;
@@ -50,6 +52,7 @@ public class ScheduleService {
 //    }
 
     @Transactional
+    @Cacheable("schedule")
     public List<WeekResponseDto> getSchedule(Map<String, String> params) {
 
         String community = Optional.ofNullable(params.get("community")).orElse("UM");
@@ -82,7 +85,12 @@ public class ScheduleService {
     public void refreshFromGoogleSheets(boolean refreshEntities) throws GeneralSecurityException, IOException {
 
         sheetsService.refreshFromGoogleSheets(refreshEntities);
+        evictCache();
 
+    }
+
+    @CacheEvict(value = "schedule", allEntries = true)
+    public void evictCache() {
 
     }
 }

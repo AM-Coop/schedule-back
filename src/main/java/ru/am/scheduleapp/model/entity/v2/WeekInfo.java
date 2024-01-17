@@ -13,6 +13,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@Table(name = "schedule_week_info")
+
 public class WeekInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

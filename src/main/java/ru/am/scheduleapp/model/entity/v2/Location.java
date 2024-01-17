@@ -14,6 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@Table(name = "schedule_location")
 public class Location {
 
     @jakarta.persistence.Id

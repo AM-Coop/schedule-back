@@ -15,6 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@Table(name = "schedule_week")
 public class Week {
     @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.UUID)

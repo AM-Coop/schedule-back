@@ -5,7 +5,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     password: 'password'
     username: 'postgres'
-    url: 'jdbc:postgresql://localhost:5432/schedule'
+    url: 'jdbc:postgresql://localhost:5432/crm'
   jpa:
     hibernate:
       ddl-auto: update

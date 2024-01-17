@@ -18,6 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@Table(name = "schedule_event")
 public class Event {
 
     @jakarta.persistence.Id

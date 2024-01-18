@@ -2,17 +2,14 @@ package ru.am.scheduleapp.service.v2;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.am.scheduleapp.model.dto.v2.WeekResponseDto;
 import ru.am.scheduleapp.model.entity.v2.Week;
+import ru.am.scheduleapp.repository.v2.RegionDictRepository;
 import ru.am.scheduleapp.repository.v2.WeekRepository;
 import ru.am.scheduleapp.utils.DtoMapperUtils;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +21,8 @@ import java.util.Optional;
 public class ScheduleService {
 
     private final WeekRepository weekRepository;
+    private final RegionDictRepository regionDictRepository;
+
     private final SheetsService sheetsService;
 
 //    @PostConstruct
@@ -52,8 +51,10 @@ public class ScheduleService {
 //    }
 
     @Transactional
-    @Cacheable("schedule")
+//    @Cacheable("schedule")
     public List<WeekResponseDto> getSchedule(Map<String, String> params) {
+        String regionCode = Optional.ofNullable(params.get("region")).orElse("MSC");
+
 
         String community = Optional.ofNullable(params.get("community")).orElse("UM");
 
@@ -82,18 +83,18 @@ public class ScheduleService {
                     (elem.getDateTo().isAfter(start.toLocalDate()) || elem.getDateTo().isEqual(start.toLocalDate()));
         }).findFirst().orElse(current);
 
-        return current != null ? List.of(DtoMapperUtils.mapFromWeekEntity(current, showAm, showUm)) : List.of();
+        return current != null ? List.of(DtoMapperUtils.mapFromWeekEntity(current, showAm, showUm, regionCode)) : List.of();
     }
 
-    public void refreshFromGoogleSheets(boolean refreshEntities) throws GeneralSecurityException, IOException {
-
-        sheetsService.refreshFromGoogleSheets(refreshEntities);
-        evictCache();
-
-    }
-
-    @CacheEvict(value = "schedule", allEntries = true)
-    public void evictCache() {
-
-    }
+//    public void refreshFromGoogleSheets(boolean refreshEntities) throws GeneralSecurityException, IOException {
+//
+//        sheetsService.refreshFromGoogleSheets(refreshEntities);
+//        evictCache();
+//
+//    }
+//
+//    @CacheEvict(value = "schedule", allEntries = true)
+//    public void evictCache() {
+//
+//    }
 }

@@ -8,34 +8,39 @@ import ru.am.scheduleapp.model.entity.v2.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DtoMapperUtils {
 
-    public static WeekResponseDto mapFromWeekEntity(Week week, boolean showAm, boolean showUm) {
-        WeekInfo weekInfo = week.getWeekInfos().stream().filter(info -> {
+    public static WeekResponseDto mapFromWeekEntity(Week week, boolean showAm, boolean showUm, String regionCode) {
+        return week.getWeekInfos().stream().filter(info -> {
+            if (!regionCode.equals(Optional.ofNullable(info.getRegionDict()).map(RegionDict::getCode).orElse(null)))
+                return false;
             if (showAm) return Objects.equals(info.getCommunity(), "AM");
             else return Objects.equals(info.getCommunity(), "UM");
-        }).findFirst().get();
-        return new WeekResponseDto(
-                week.getId(),
-                week.getNum(),
-                week.getDateFrom(),
-                week.getDateTo(),
-                weekInfo.getQuote(),
-                weekInfo.getNote1(),
-                weekInfo.getNote2(),
-                weekInfo.getCommunity(),
-                mapEvents(week.getEventList(), showAm, showUm)
-        );
+        }).findFirst().map(weekInfo ->
+                new WeekResponseDto(
+                        week.getId(),
+                        week.getNum(),
+                        week.getDateFrom(),
+                        week.getDateTo(),
+                        weekInfo.getQuote(),
+                        weekInfo.getNote1(),
+                        weekInfo.getNote2(),
+                        weekInfo.getCommunity(),
+                        mapEvents(week.getEventList(), showAm, showUm, regionCode)
+                )
+        ).orElse(new WeekResponseDto());
+
     }
 
 
-    private static List<EventResponseDto> mapEvents(List<Event> eventList, boolean showAm, boolean showUm) {
+    private static List<EventResponseDto> mapEvents(List<Event> eventList, boolean showAm, boolean showUm, String regionCode) {
         return eventList.stream()
                 .filter(elem -> {
                     if (!elem.isPublish()) return false;
-
+                    if (!regionCode.equals(Optional.ofNullable(elem.getLocation().getRegionDict()).map(RegionDict::getCode).orElse(null))) return false;
                     if (showAm && showUm) return true;
                     else if (showAm) return elem.isSuitableAm();
                     else return elem.isSuitableUm();

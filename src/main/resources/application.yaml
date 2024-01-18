@@ -6,11 +6,11 @@ spring:
     password: 'password'
     username: 'postgres'
     url: 'jdbc:postgresql://localhost:5432/crm'
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    generate-ddl: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: false
+#    generate-ddl: true
 
 ru:
   am:

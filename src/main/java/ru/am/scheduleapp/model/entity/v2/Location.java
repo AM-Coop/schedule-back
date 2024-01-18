@@ -37,6 +37,9 @@ public class Location {
 
     private Integer displayOrder;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private RegionDict regionDict;
+
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Event> events;
 }

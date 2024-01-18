@@ -33,6 +33,8 @@ public class WeekInfo {
     //    @Column(length = 10000)
     private String community;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private RegionDict regionDict;
     @ManyToOne
     private Week week;
 

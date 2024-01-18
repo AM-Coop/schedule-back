@@ -32,7 +32,10 @@ public class Manager {
     private String contact;
 
     private String worldlyName;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private RegionDict regionDict;
+
     @OneToMany(mappedBy = "manager", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Event> events;
 
